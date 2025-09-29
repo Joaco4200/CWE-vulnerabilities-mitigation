@@ -15,9 +15,11 @@ services:
     build:
       context: ./services/backend
       dockerfile: DockerFile
+    env_file:
+      - .env
     container_name: backend
     ports:
-      - "5000:3000"
+      - "5001:3000"
     environment:
       - DB_HOST=postgres
       - DB_USER=user

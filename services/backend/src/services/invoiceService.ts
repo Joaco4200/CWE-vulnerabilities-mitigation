@@ -15,8 +15,19 @@ interface InvoiceRow {
 
 class InvoiceService {
   static async list( userId: string, status?: string, operator?: string): Promise<Invoice[]> {
+
+    const validOperators = ['=', '!=', '<', '<=', '>', '>='];
+    const op = (operator || '=').trim();
+
+    if (operator && !validOperators.includes(op)) {
+      throw new Error('Invalid operator');
+    }
+    
     let q = db<InvoiceRow>('invoices').where({ userId: userId });
-    if (status) q = q.andWhereRaw(" status "+ operator + " '"+ status +"'");
+    if (status) {
+      q = q.andWhereRaw(`status ${op} ?`, [status]);  //uso binding y valido operadores.
+    }
+
     const rows = await q.select();
     const invoices = rows.map(row => ({
       id: row.id,
@@ -27,6 +38,7 @@ class InvoiceService {
     ));
     return invoices;
   }
+
 
   static async setPaymentCard(
     userId: string,
@@ -39,6 +51,8 @@ class InvoiceService {
     // use axios to call http://paymentBrand/payments as a POST request
     // with the body containing ccNumber, ccv, expirationDate
     // and handle the response accordingly
+
+    
     const paymentResponse = await axios.post(`http://${paymentBrand}/payments`, {
       ccNumber,
       ccv,
@@ -72,7 +86,11 @@ class InvoiceService {
       throw new Error('Invoice not found');
     }
     try {
+      if(!/^[a-zA-Z0-9_-]+\.pdf$/.test(pdfName)) { //solo trata de leer el pdf
+        throw new Error('Invalid pdfName');
+      }
       const filePath = `/invoices/${pdfName}`;
+
       const content = await fs.readFile(filePath, 'utf-8');
       return content;
     } catch (error) {

@@ -41,6 +41,7 @@ docker compose exec postgres psql -U user -d jwt_api -c "SELECT table_name FROM 
 ```
 
 ## Troubleshooting
+
 ### El frontend no levanta tras el compose
 - Revisar logs: `docker compose logs -f frontend` o `docker compose logs -f backend`
 - Alternativamente, iniciar el contenedor desde la UI de Docker Desktop puede destrabar si la imagen quedó construida correctamente.

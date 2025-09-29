@@ -73,6 +73,14 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   const userId = req.params.id;
+  const authUserId = req.user!.id; // from authMiddleware
+
+
+  if (authUserId !== userId) { //valido que sea el mismo usuario
+    return res.status(403).json({ message: 'Forbbiden' });
+  }
+
+
   const { username, password, email, first_name, last_name } = req.body;
   try {
   const user: User = {
@@ -80,7 +88,8 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
       password,
       email,
       first_name,
-      last_name
+      last_name,
+      id: userId
     };
     const userDB = await AuthService.updateUser(user);
       res.status(201).json(userDB);
