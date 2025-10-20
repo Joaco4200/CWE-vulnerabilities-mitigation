@@ -44,12 +44,13 @@ const setPaymentCard = async (req: Request, res: Response, next: NextFunction) =
 const getInvoicePDF = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const invoiceId = req.params.id;
+    const userId= req.user.id
     const pdfName = req.query.pdfName as string | undefined;
 
     if (!pdfName) {
       return res.status(400).json({ error: 'Missing parameter pdfName' });
     }
-    const pdf = await InvoiceService.getReceipt(invoiceId, pdfName);
+    const pdf = await InvoiceService.getReceipt(invoiceId, pdfName, userId);
     // return the pdf as a binary response
     res.setHeader('Content-Type', 'application/pdf');
     res.send(pdf);
@@ -62,7 +63,8 @@ const getInvoicePDF = async (req: Request, res: Response, next: NextFunction) =>
 const getInvoice = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const invoiceId = req.params.id;
-    const invoice = await InvoiceService.getInvoice(invoiceId);
+    const userId= req.user.id
+    const invoice = await InvoiceService.getInvoice(invoiceId, userId);
     res.status(200).json(invoice);
 
   } catch (err) {

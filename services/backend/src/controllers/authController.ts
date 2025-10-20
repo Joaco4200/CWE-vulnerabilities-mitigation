@@ -17,6 +17,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await AuthService.authenticate(username, password);
     const token = await AuthService.generateJwt(user.id);
+    delete user.password;
     res.json({ token, user });
   } catch (err) {
     next(err);
