@@ -1,12 +1,48 @@
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
+import ejs from 'ejs';
 
 import InvoiceService from '../../src/services/invoiceService';
 import db from '../../src/db';
 import { Invoice } from '../../src/types/invoice';
+process.env.JWT_SECRET = 'test-secret';
 
+import AuthService from '../../src/services/authService';
+
+
+jest.mock('nodemailer');
 jest.mock('../../src/db')
 const mockedDb = db as jest.MockedFunction<typeof db>
+
+test('Not Allowed Template Injection', async () =>{
+
+  (db as unknown as jest.Mock).mockReturnValue({
+    where: () => ({
+      orWhere: () => ({
+        first: async () => null,
+        insert: async () => {}
+      })
+    })
+  });
+
+  const sendMail = jest.fn();
+(nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail });
+
+  const userMalicioso = {
+    username: 'joaco',
+    password: 'joaco2019',
+    email: 'joaco2019@example.com',
+    first_name: '<%= 2 + 2 %>',
+    last_name: 'xxx'
+  };
+
+  await AuthService.createUser(userMalicioso);
+
+  const html = sendMail.mock.calls[0][0].html;
+  expect(html).not.toContain('4');
+
+});
+
 
 
 describe('AuthService.generateJwt', () => {
