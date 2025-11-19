@@ -66,3 +66,20 @@ def test_login(setup_create_user):
     auth_token = response.json()["token"]
     assert auth_token
 
+def test_invoices_sqli(setup_create_user):
+    username = setup_create_user[0]
+    password = setup_create_user[1]
+
+    login= requests.post(
+        "http://localhost:5000/auth/login", json={
+        "username": username,
+        "password": password
+    })
+    token = login.json().get("token")
+    assert login.status_code == 200
+
+    r = requests.get("http://localhost:5000/invoices", 
+                     headers={"Authorization": f"Bearer {token}"}, 
+                     params={"status": "unpaid' OR 1=1--"})
+
+    assert r.status_code != 500
