@@ -7,6 +7,13 @@ import db from '../../src/db';
 import { Invoice } from '../../src/types/invoice';
 process.env.JWT_SECRET = 'test-secret';
 
+// Mock the db module
+jest.mock('../../src/db', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+const mockedDb = jest.requireMock('../../src/db').default;
+
 import AuthService from '../../src/services/authService';
 
 

@@ -37,7 +37,7 @@ def setup_create_user():
     username = f'user{i}'
     email = f'{username}@test.com'
     password = 'password'
-    salida = requests.post("http://localhost:5000/users",
+    salida = requests.post("http://localhost:5001/users",
                         data={
                             "username": username, 
                             "password": password,
@@ -53,7 +53,7 @@ def setup_create_user():
     token = extract_query_params(link)
 
     # activate user
-    response = requests.post("http://localhost:5000/auth/set-password", json={"token": token, "newPassword": password})
+    response = requests.post("http://localhost:5001/auth/set-password", json={"token": token, "newPassword": password})
 
 
     return [username,password]
@@ -62,7 +62,24 @@ def test_login(setup_create_user):
     username = setup_create_user[0]
     password = setup_create_user[1]
 
-    response = requests.post("http://localhost:5000/auth/login", json={"username": username, "password": password})
+    response = requests.post("http://localhost:5001/auth/login", json={"username": username, "password": password})
     auth_token = response.json()["token"]
     assert auth_token
 
+def test_invoices_sqli(setup_create_user):
+    username = setup_create_user[0]
+    password = setup_create_user[1]
+
+    login= requests.post(
+        "http://localhost:5001/auth/login", json={
+        "username": username,
+        "password": password
+    })
+    token = login.json().get("token")
+    assert login.status_code == 200
+
+    r = requests.get("http://localhost:5001/invoices", 
+                     headers={"Authorization": f"Bearer {token}"}, 
+                     params={"status": "unpaid' OR 1=1--"})
+
+    assert r.status_code != 500
