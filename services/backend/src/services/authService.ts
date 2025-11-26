@@ -45,7 +45,7 @@ class AuthService {
     const template = `
     <html>
       <body>
-        <h1>Hello <%- first_name %> <%- last_name %></h1>
+        <h1>Hello <%= first_name %> <%= last_name %></h1>
         <p>Click <a href="${ link }">here</a> to activate your account.</p>
       </body>
     </html>
