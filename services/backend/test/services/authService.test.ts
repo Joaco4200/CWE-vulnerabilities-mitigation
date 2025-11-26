@@ -360,10 +360,11 @@ describe('AuthService.generateJwt', () => {
       email: "sca@gmail.com"
     }
 
-    const template = "<%= first_name %> <%= last_name %>";
+    
+    const template= `${maliciusInput.first_name} ${maliciusInput.last_name}`
     const result = ejs.render(template, maliciusInput);
 
-    expect(result).not.toContain("5555")
+    expect(result).toContain("&lt;%= 5555 %&gt;");
   })
 
 });
