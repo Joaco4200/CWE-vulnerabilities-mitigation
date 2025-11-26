@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import ejs from 'ejs';
 
 import AuthService from '../../src/services/authService';
 import db from '../../src/db';
@@ -350,4 +351,21 @@ describe('AuthService.generateJwt', () => {
     expect((decoded as any).id).toBe(userId);
   });
 
+  it("email sender template injection fix", () =>{
+
+    const maliciusInput={
+      first_name: "<%= 5555 %>",
+      last_name: "scarone",
+      username: "sca",
+      email: "sca@gmail.com"
+    }
+
+    const template = "<%= first_name %> <%= last_name %>";
+    const result = ejs.render(template, maliciusInput);
+
+    expect(result).not.toContain("5555")
+  })
+
 });
+
+
